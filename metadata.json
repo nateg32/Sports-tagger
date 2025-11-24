@@ -1,0 +1,5 @@
+{
+  "name": "Live Sports Tagger",
+  "description": "A professional-grade, real-time sports tagging application for camera operators. Tags events during matches and exports XML for NLE video editors.",
+  "requestFramePermissions": []
+}
