@@ -1,6 +1,7 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Session, SportType } from '../types';
-import { Plus, Calendar, Video, Trash2, Copy } from 'lucide-react';
+import { Plus, Calendar, Video, Trash2, Copy, X } from 'lucide-react';
 
 interface Props {
   sessions: Session[];
@@ -8,11 +9,26 @@ interface Props {
   onSelectSession: (s: Session) => void;
   onDuplicate: (s: Session) => void;
   onDelete: (id: string) => void;
+  onRestore: (session: Session) => void;
 }
 
-export const SessionList: React.FC<Props> = ({ sessions, onCreateNew, onSelectSession, onDuplicate, onDelete }) => {
+export const SessionList: React.FC<Props> = ({ sessions, onCreateNew, onSelectSession, onDuplicate, onDelete, onRestore }) => {
+  const [deletedSession, setDeletedSession] = useState<Session | null>(null);
+
+  const handleDeleteClick = (session: Session) => {
+    setDeletedSession(session);
+    onDelete(session.id);
+  };
+
+  const handleUndoDelete = () => {
+    if (deletedSession) {
+        onRestore(deletedSession);
+        setDeletedSession(null);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 relative">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Live Sports Tagger</h1>
@@ -70,7 +86,7 @@ export const SessionList: React.FC<Props> = ({ sessions, onCreateNew, onSelectSe
                   <Copy size={18} />
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); if(confirm('Delete this session permanently?')) onDelete(session.id); }}
+                  onClick={(e) => { e.stopPropagation(); handleDeleteClick(session); }}
                   className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
                   title="Delete Session"
                 >
@@ -85,6 +101,20 @@ export const SessionList: React.FC<Props> = ({ sessions, onCreateNew, onSelectSe
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Undo Toast */}
+      {deletedSession && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl border border-slate-700 flex items-center gap-4 z-50 animate-in slide-in-from-bottom-2">
+            <span>Session deleted</span>
+            <button 
+                onClick={handleUndoDelete}
+                className="text-indigo-400 font-bold hover:text-indigo-300"
+            >
+                Undo
+            </button>
+            <button onClick={() => setDeletedSession(null)} className="text-slate-500 hover:text-white"><X size={16} /></button>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+
 export enum SportType {
   Soccer = 'Soccer',
   Basketball = 'Basketball',
@@ -67,7 +68,8 @@ export interface Session {
 export enum AppView {
   Home = 'HOME',
   Setup = 'SETUP',
-  Live = 'LIVE'
+  Live = 'LIVE',
+  Review = 'REVIEW'
 }
 
 export enum MatchStatus {

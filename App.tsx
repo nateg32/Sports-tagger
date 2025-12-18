@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppView, Session } from './types';
 import { SessionList } from './components/SessionList';
 import { SessionSetup } from './components/SessionSetup';
 import { LiveTagger } from './components/LiveTagger';
+import { ReviewSession } from './components/ReviewSession';
 import { getSessions, saveSession, deleteSession, getSessionById } from './services/storageService';
 
 const App: React.FC = () => {
@@ -30,6 +32,11 @@ const App: React.FC = () => {
 
   const handleDelete = (id: string) => {
     deleteSession(id);
+    setSessions(getSessions());
+  };
+
+  const handleRestoreSession = (session: Session) => {
+    saveSession(session);
     setSessions(getSessions());
   };
 
@@ -66,7 +73,13 @@ const App: React.FC = () => {
     }
 
     setView(destination);
-    setCurrentSession(null);
+    
+    // Only clear current session if going home
+    // If going to Review (which is now handled by view state hiding), we keep session.
+    // Actually handleExitLive is called from Review to go Home too.
+    if (destination === AppView.Home) {
+        setCurrentSession(null);
+    }
   };
 
   return (
@@ -78,6 +91,7 @@ const App: React.FC = () => {
           onSelectSession={handleSelectSession}
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
+          onRestore={handleRestoreSession}
         />
       )}
       
@@ -89,11 +103,22 @@ const App: React.FC = () => {
         />
       )}
 
-      {view === AppView.Live && currentSession && (
-        <LiveTagger 
-          session={currentSession}
-          onUpdateSession={handleUpdateSession}
-          onExit={handleExitLive}
+      {/* Keep LiveTagger mounted when in Review to preserve timer state */}
+      {currentSession && (view === AppView.Live || view === AppView.Review) && (
+        <div style={{ display: view === AppView.Live ? 'contents' : 'none' }}>
+            <LiveTagger 
+              session={currentSession}
+              onUpdateSession={handleUpdateSession}
+              onExit={handleExitLive}
+            />
+        </div>
+      )}
+
+      {view === AppView.Review && currentSession && (
+        <ReviewSession 
+            session={currentSession}
+            onUpdateSession={handleUpdateSession}
+            onExit={handleExitLive}
         />
       )}
     </div>
